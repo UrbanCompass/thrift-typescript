@@ -6,6 +6,7 @@ import {
     ConstValue,
     DoubleConstant,
     FunctionType,
+    Identifier,
     IntConstant,
     ListType,
     MapType,
@@ -63,8 +64,10 @@ export function renderValue(
         case SyntaxType.ConstMap:
             if (fieldType.type === SyntaxType.MapType) {
                 return renderMap(fieldType, node, state)
+            } else if (fieldType.type === SyntaxType.Identifier) {
+                return renderStruct(fieldType, node, state)
             } else {
-                throw new TypeError(`Type map expected`)
+                throw new TypeError(`Type map | struct identifier expected`)
             }
 
         default:
@@ -129,6 +132,67 @@ function renderMap(
 
     return ts.createNew(COMMON_IDENTIFIERS.Map, undefined, [
         ts.createArrayLiteral(values),
+    ])
+}
+
+function renderStruct(
+    fieldType: Identifier,
+    node: ConstMap,
+    state: IRenderState,
+): ts.NewExpression {
+    // Resolve struct definition
+    const { definition, namespace } = Resolver.resolveIdentifierDefinition(
+        fieldType,
+        {
+            currentNamespace: state.currentNamespace,
+            currentDefinitions: state.currentDefinitions,
+            namespaceMap: state.project.namespaces,
+        },
+    )
+    if (definition.type !== SyntaxType.StructDefinition) {
+        throw new TypeError('Expected Struct Definition')
+    }
+    const values = node.properties.map(({ name: propName, initializer }) => {
+        if (propName.type !== SyntaxType.StringLiteral) {
+            throw new TypeError('Expected StringLiteral type')
+        }
+
+        // Find corresponding field def in struct def
+        const fieldDef = definition.fields.find(
+            ({ name: fieldName }) => fieldName.value === propName.value,
+        )
+        if (!fieldDef) {
+            throw new Error('Missing field definition')
+        }
+
+        // HACK(josh): If the definition namespace is not part of an identifier fieldtype
+        // we must stub it in for it to be referenced properly. This is because of how
+        // resolveIdentifierDefinition works. There should be a better way which preserves
+        // current namespace
+        let { fieldType: defFieldType } = fieldDef
+        if (defFieldType.type === SyntaxType.Identifier) {
+            defFieldType = Resolver.resolveIdentifierWithAccessor(
+                defFieldType,
+                namespace,
+                fieldType,
+                state.currentNamespace,
+            )
+        }
+
+        return ts.createPropertyAssignment(
+            ts.createLiteral(propName.value),
+            renderValue(defFieldType, initializer, state),
+        )
+    })
+
+    const name = Resolver.resolveIdentifierName(fieldType.value, {
+        currentNamespace: state.currentNamespace,
+        currentDefinitions: state.currentDefinitions,
+        namespaceMap: state.project.namespaces,
+    })
+
+    return ts.createNew(ts.createIdentifier(name.fullName), undefined, [
+        ts.createObjectLiteral(values),
     ])
 }
 

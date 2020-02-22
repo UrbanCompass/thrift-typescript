@@ -9,6 +9,11 @@ struct SharedStruct {
   2: required string value
 }
 
+struct SharedSimpleStruct {
+  1: required bool sharedflag
+  2: required string sharedstring
+}
+
 union SharedUnion {
   1: string option1
   2: string option2

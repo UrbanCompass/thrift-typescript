@@ -10,6 +10,7 @@ import {
 
 import { IResolveContext, IResolveResult } from '../types'
 import { resolveIdentifierDefinition } from './resolveIdentifierDefinition'
+import { resolveIdentifierWithAccessor } from './resolveIdentifierWithAccessor'
 
 function identifiersForFieldType(
     fieldType: FunctionType,
@@ -30,6 +31,7 @@ function identifiersForFieldType(
                 )
 
                 const definition = result.definition
+                const namespace = result.namespace
 
                 if (definition.type === SyntaxType.TypedefDefinition) {
                     identifiersForFieldType(
@@ -38,9 +40,43 @@ function identifiersForFieldType(
                         context,
                     )
                 }
-            }
 
-            results.add(fieldType.value)
+                results.add(fieldType.value)
+
+                if (definition.type === SyntaxType.StructDefinition) {
+                    for (const field of definition.fields) {
+                        // HACK(josh): If the definition namespace is not part of an identifier
+                        // fieldtype we must stub it in for it to be referenced properly. This is
+                        // because of how resolveIdentifierDefinition works. There should be a better
+                        // way which preserves current namespace
+                        let { fieldType: defFieldType } = field
+                        if (defFieldType.type === SyntaxType.Identifier) {
+                            defFieldType = resolveIdentifierWithAccessor(
+                                defFieldType,
+                                namespace,
+                                fieldType,
+                                context.currentNamespace,
+                            )
+
+                            // Do result check to avoid infinite tail recursion
+                            if (!results.has(defFieldType.value)) {
+                                identifiersForFieldType(
+                                    defFieldType,
+                                    results,
+                                    context,
+                                    true,
+                                )
+                            }
+                        } else {
+                            identifiersForFieldType(
+                                defFieldType,
+                                results,
+                                context,
+                            )
+                        }
+                    }
+                }
+            }
             break
 
         case SyntaxType.MapType:
@@ -104,7 +140,7 @@ export function identifiersForStatements(
                 break
 
             case SyntaxType.ConstDefinition:
-                identifiersForFieldType(next.fieldType, results, context)
+                identifiersForFieldType(next.fieldType, results, context, true)
                 identifiersForConstValue(next.initializer, results)
                 break
 

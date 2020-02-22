@@ -19,6 +19,10 @@ struct Work {
   4: optional string comment,
 }
 
+struct Test {
+  1: CommonStruct common
+}
+
 struct FirstName {
   1: string name
 }
