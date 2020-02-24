@@ -17,6 +17,7 @@
         "prebuild": "npm run clean && npm run lint && npm run format",
         "build": "npm run build:only",
         "build:only": "tsc",
+        "prepare": "npm run build",
         "prebuild:test": "npm run build && npm run codegen",
         "build:test": "npm run build:test:only",
         "build:test:only": "tsc -p tsconfig.test.json",
