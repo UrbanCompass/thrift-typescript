@@ -51,7 +51,6 @@ function fieldTypeUsesThrift(
                         defFieldType = Resolver.resolveIdentifierWithAccessor(
                             defFieldType,
                             namespace,
-                            fieldType,
                             state.currentNamespace,
                         )
                     }

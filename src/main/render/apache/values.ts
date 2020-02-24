@@ -152,6 +152,16 @@ function renderStruct(
     if (definition.type !== SyntaxType.StructDefinition) {
         throw new TypeError('Expected Struct Definition')
     }
+
+    // HACK(josh): If the recursively checked namespace is not part of the current namespace we may
+    // need it. This adds it to the current namespace includes.
+    // This should actually be done at the parser level. We only need to do it here because this is the first
+    // recursive check run.
+    if (!state.currentNamespace.includedNamespaces[namespace.namespace.accessor]) {
+        state.currentNamespace.includedNamespaces[namespace.namespace.accessor] =
+            state.project.namespaces[namespace.namespace.accessor].namespace;
+    }
+
     const values = node.properties.map(({ name: propName, initializer }) => {
         if (propName.type !== SyntaxType.StringLiteral) {
             throw new TypeError('Expected StringLiteral type')
@@ -174,7 +184,6 @@ function renderStruct(
             defFieldType = Resolver.resolveIdentifierWithAccessor(
                 defFieldType,
                 namespace,
-                fieldType,
                 state.currentNamespace,
             )
         }

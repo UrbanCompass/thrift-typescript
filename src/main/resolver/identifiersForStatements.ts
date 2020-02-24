@@ -54,7 +54,6 @@ function identifiersForFieldType(
                             defFieldType = resolveIdentifierWithAccessor(
                                 defFieldType,
                                 namespace,
-                                fieldType,
                                 context.currentNamespace,
                             )
 
