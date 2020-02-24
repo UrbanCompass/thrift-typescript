@@ -135,7 +135,9 @@ function statementUsesInt64(
             })
 
         case SyntaxType.StructDefinition:
+            return true
         case SyntaxType.UnionDefinition:
+            return true
         case SyntaxType.ExceptionDefinition:
             return statement.fields.some((field: FieldDefinition) => {
                 return field.fieldType.type === SyntaxType.I64Keyword

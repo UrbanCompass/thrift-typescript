@@ -44,7 +44,7 @@ export function renderInterface(
             undefined,
             field.name.value,
             renderOptional(field.requiredness),
-            typeNodeForFieldType(field.fieldType, state, true),
+            typeNodeForFieldType(field.fieldType, state),
             undefined,
         )
     })
