@@ -24,7 +24,7 @@
         "lint": "tslint --fix 'src/**/*.ts'",
         "format": "prettier --write 'src/**/*.ts'",
         "move:fixtures": "rimraf dist/tests/unit/fixtures && cp -r src/tests/unit/fixtures dist/tests/unit/fixtures",
-        "prepare": "npm run build:only",
+        "post-install": "npm run build:only",
         "pretest": "npm run build:test && npm run move:fixtures",
         "test": "npm run test:unit && npm run test:integration",
         "test:unit": "NODE_ENV=test mocha --opts mocha.opts",
