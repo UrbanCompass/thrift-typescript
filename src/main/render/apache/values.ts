@@ -157,9 +157,14 @@ function renderStruct(
     // need it. This adds it to the current namespace includes.
     // This should actually be done at the parser level. We only need to do it here because this is the first
     // recursive check run.
-    if (!state.currentNamespace.includedNamespaces[namespace.namespace.accessor]) {
-        state.currentNamespace.includedNamespaces[namespace.namespace.accessor] =
-            state.project.namespaces[namespace.namespace.accessor].namespace;
+    if (
+        state.currentNamespace.namespace.accessor !==
+            namespace.namespace.accessor &&
+        !state.currentNamespace.includedNamespaces[namespace.namespace.accessor]
+    ) {
+        state.currentNamespace.includedNamespaces[
+            namespace.namespace.accessor
+        ] = state.project.namespaces[namespace.namespace.accessor].namespace
     }
 
     const values = node.properties.map(({ name: propName, initializer }) => {

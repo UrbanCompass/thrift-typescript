@@ -37,9 +37,19 @@ function identifiersForFieldType(
                 // need it. This adds it to the current namespace includes.
                 // This should actually be done at the parser level. We only need to do it here because this is the first
                 // recursive check run.
-                if (!context.currentNamespace.includedNamespaces[namespace.namespace.accessor]) {
-                    context.currentNamespace.includedNamespaces[namespace.namespace.accessor] =
-                        context.namespaceMap[namespace.namespace.accessor].namespace;
+                if (
+                    context.currentNamespace.namespace.accessor !==
+                        namespace.namespace.accessor &&
+                    !context.currentNamespace.includedNamespaces[
+                        namespace.namespace.accessor
+                    ]
+                ) {
+                    context.currentNamespace.includedNamespaces[
+                        namespace.namespace.accessor
+                    ] =
+                        context.namespaceMap[
+                            namespace.namespace.accessor
+                        ].namespace
                 }
 
                 if (definition.type === SyntaxType.TypedefDefinition) {

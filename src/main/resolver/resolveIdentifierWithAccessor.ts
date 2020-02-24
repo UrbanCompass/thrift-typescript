@@ -15,7 +15,6 @@ export function resolveIdentifierWithAccessor(
     idNamespace: INamespace,
     parentNamespace: INamespace,
 ): Identifier {
-
     // Only need to adjust id when id namespace is not in parent namespace
     if (idNamespace.namespace.accessor !== parentNamespace.namespace.accessor) {
         return stubIdentifier(idNamespace.namespace.accessor + '.' + id.value)
