@@ -7,6 +7,7 @@ import { organizeByNamespace } from './organizeByNamespace'
 import { resolveConstValue } from './resolveConstValue'
 import { resolveIdentifierDefinition } from './resolveIdentifierDefinition'
 import { resolveIdentifierName } from './resolveIdentifierName'
+import { resolveIdentifierWithAccessor } from './resolveIdentifierWithAccessor'
 import { resolveNamespace } from './resolveNamespace'
 
 export const Resolver = {
@@ -19,5 +20,6 @@ export const Resolver = {
     resolveConstValue,
     resolveIdentifierName,
     resolveIdentifierDefinition,
+    resolveIdentifierWithAccessor,
     resolveNamespace,
 }

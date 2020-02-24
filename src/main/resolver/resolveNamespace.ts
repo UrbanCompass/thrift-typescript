@@ -37,7 +37,7 @@ import { resolveIdentifierDefinition } from './resolveIdentifierDefinition'
  *
  * 3. We need to rewrite the paths for imported identifiers.
  *
- *      For example, if a identifier is being imported from another file such as "operation.Operation", we
+ *      For example, if an identifier is being imported from another file such as "operation.Operation", we
  *      need to rewrite this so that the file path is replaced with the namespace path such as
  *      "com_test_operation.Operation"
  *

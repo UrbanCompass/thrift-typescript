@@ -48,11 +48,11 @@ export function renderImports(
         ..._renderIncludes(statements, state),
     ]
 
-    if (statementsUseThrift(statements)) {
+    if (statementsUseThrift(statements, state)) {
         includes.unshift(renderThriftImports(state.options.library))
     }
 
-    if (statementsUseInt64(statements)) {
+    if (statementsUseInt64(statements, state)) {
         includes.unshift(renderInt64Import())
     }
 

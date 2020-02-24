@@ -14,7 +14,7 @@ import { renderOptional } from './utils'
  * Returns the name of the interface for the args arguments for a given struct-like object
  */
 export function interfaceNameForClass(statement: InterfaceWithFields): string {
-    return `I${statement.name.value}Args`
+    return `I${statement.name.value}__Args`
 }
 
 /**
@@ -44,7 +44,7 @@ export function renderInterface(
             undefined,
             field.name.value,
             renderOptional(field.requiredness),
-            typeNodeForFieldType(field.fieldType, state, true),
+            typeNodeForFieldType(field.fieldType, state),
             undefined,
         )
     })

@@ -176,6 +176,9 @@ export function validateNamespace(
                 break
 
             case SyntaxType.StructDefinition:
+                // TODO(josh): create validation for struct definitions
+                break
+
             case SyntaxType.UnionDefinition:
             case SyntaxType.ExceptionDefinition:
                 throw new ValidationError(

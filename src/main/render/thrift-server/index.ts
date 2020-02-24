@@ -33,7 +33,7 @@ export function renderImports(
     statements: Array<ThriftStatement>,
     state: IRenderState,
 ): Array<ts.Statement> {
-    if (statementsUseThrift(statements)) {
+    if (statementsUseThrift(statements, state)) {
         return [
             renderThriftImports(state.options.library),
             ..._renderIncludes(statements, state),

@@ -13,27 +13,82 @@ import { Resolver } from '../../resolver'
 import { DefinitionType, INamespacePath, IRenderState } from '../../types'
 import { COMMON_IDENTIFIERS } from './identifiers'
 
-function fieldTypeUsesThrift(fieldType: FieldType): boolean {
+function fieldTypeUsesThrift(
+    fieldType: FieldType,
+    state: IRenderState,
+): boolean {
     switch (fieldType.type) {
         case SyntaxType.I64Keyword:
             return true
 
         case SyntaxType.MapType:
             return (
-                fieldTypeUsesThrift(fieldType.keyType) ||
-                fieldTypeUsesThrift(fieldType.valueType)
+                fieldTypeUsesThrift(fieldType.keyType, state) ||
+                fieldTypeUsesThrift(fieldType.valueType, state)
             )
 
         case SyntaxType.ListType:
         case SyntaxType.SetType:
-            return fieldTypeUsesThrift(fieldType.valueType)
+            return fieldTypeUsesThrift(fieldType.valueType, state)
+        case SyntaxType.Identifier:
+            const {
+                definition,
+                namespace,
+            } = Resolver.resolveIdentifierDefinition(fieldType, {
+                currentNamespace: state.currentNamespace,
+                currentDefinitions: state.currentDefinitions,
+                namespaceMap: state.project.namespaces,
+            })
+
+            // HACK(josh): If the recursively checked namespace is not part of the current namespace we may
+            // need it. This adds it to the current namespace includes.
+            // This should actually be done at the parser level. We only need to do it here because this is the first
+            // recursive check run.
+            if (
+                state.currentNamespace.namespace.accessor !==
+                    namespace.namespace.accessor &&
+                !state.currentNamespace.includedNamespaces[
+                    namespace.namespace.accessor
+                ]
+            ) {
+                state.currentNamespace.includedNamespaces[
+                    namespace.namespace.accessor
+                ] =
+                    state.project.namespaces[
+                        namespace.namespace.accessor
+                    ].namespace
+            }
+
+            if (definition.type === SyntaxType.StructDefinition) {
+                return definition.fields.some((fieldDef) => {
+                    // HACK(josh): If the definition namespace is not part of an identifier
+                    // fieldtype we must stub it in for it to be referenced properly. This is
+                    // because of how resolveIdentifierDefinition works. There should be a better
+                    // way which preserves current namespace
+                    let { fieldType: defFieldType } = fieldDef
+                    if (defFieldType.type === SyntaxType.Identifier) {
+                        defFieldType = Resolver.resolveIdentifierWithAccessor(
+                            defFieldType,
+                            namespace,
+                            state.currentNamespace,
+                        )
+                    }
+                    return (
+                        defFieldType.type !== SyntaxType.VoidKeyword &&
+                        fieldTypeUsesThrift(defFieldType, state)
+                    )
+                })
+            }
 
         default:
             return false
     }
 }
 
-function statementUsesThrift(statement: ThriftStatement): boolean {
+function statementUsesThrift(
+    statement: ThriftStatement,
+    state: IRenderState,
+): boolean {
     switch (statement.type) {
         case SyntaxType.StructDefinition:
         case SyntaxType.UnionDefinition:
@@ -48,10 +103,10 @@ function statementUsesThrift(statement: ThriftStatement): boolean {
             return false
 
         case SyntaxType.ConstDefinition:
-            return fieldTypeUsesThrift(statement.fieldType)
+            return fieldTypeUsesThrift(statement.fieldType, state)
 
         case SyntaxType.TypedefDefinition:
-            return fieldTypeUsesThrift(statement.definitionType)
+            return fieldTypeUsesThrift(statement.definitionType, state)
 
         default:
             const msg: never = statement
@@ -59,7 +114,10 @@ function statementUsesThrift(statement: ThriftStatement): boolean {
     }
 }
 
-function statementUsesInt64(statement: ThriftStatement): boolean {
+function statementUsesInt64(
+    statement: ThriftStatement,
+    state: IRenderState,
+): boolean {
     switch (statement.type) {
         case SyntaxType.ServiceDefinition:
             return statement.functions.some((func: FunctionDefinition) => {
@@ -77,7 +135,9 @@ function statementUsesInt64(statement: ThriftStatement): boolean {
             })
 
         case SyntaxType.StructDefinition:
+            return true
         case SyntaxType.UnionDefinition:
+            return true
         case SyntaxType.ExceptionDefinition:
             return statement.fields.some((field: FieldDefinition) => {
                 return field.fieldType.type === SyntaxType.I64Keyword
@@ -90,10 +150,10 @@ function statementUsesInt64(statement: ThriftStatement): boolean {
             return false
 
         case SyntaxType.ConstDefinition:
-            return fieldTypeUsesThrift(statement.fieldType)
+            return fieldTypeUsesThrift(statement.fieldType, state)
 
         case SyntaxType.TypedefDefinition:
-            return fieldTypeUsesThrift(statement.definitionType)
+            return fieldTypeUsesThrift(statement.definitionType, state)
 
         default:
             const msg: never = statement
@@ -103,9 +163,10 @@ function statementUsesInt64(statement: ThriftStatement): boolean {
 
 export function statementsUseThrift(
     statements: Array<ThriftStatement>,
+    state: IRenderState,
 ): boolean {
     for (const statement of statements) {
-        if (statementUsesThrift(statement)) {
+        if (statementUsesThrift(statement, state)) {
             return true
         }
     }
@@ -115,9 +176,10 @@ export function statementsUseThrift(
 
 export function statementsUseInt64(
     statements: Array<ThriftStatement>,
+    state: IRenderState,
 ): boolean {
     for (const statement of statements) {
-        if (statementUsesInt64(statement)) {
+        if (statementUsesInt64(statement, state)) {
             return true
         }
     }
