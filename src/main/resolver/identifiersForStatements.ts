@@ -12,15 +12,26 @@ import { IResolveContext, IResolveResult } from '../types'
 import { resolveIdentifierDefinition } from './resolveIdentifierDefinition'
 import { resolveIdentifierWithAccessor } from './resolveIdentifierWithAccessor'
 
+/**
+ * Resolve all identifiers used by a given field type
+ * @param fieldType The field type we are checking for identifiers
+ * @param results (MUTATED) result set which will contain all fieldtype identifiers
+ * @param context Resolver context used for finding identifier definitions
+ * @param resolveTypedefs Flag
+ * @param recursiveResolve
+ */
 function identifiersForFieldType(
     fieldType: FunctionType,
     results: Set<string>,
     context: IResolveContext,
     // Is this identifier being resolved in a context where we need to know the underlying type of typedefs?
     resolveTypedefs: boolean = false,
+    // This flag toggles whether we need to continue recursing along typedefs and struct defs
+    recursiveResolve: boolean = false,
 ): void {
     switch (fieldType.type) {
         case SyntaxType.Identifier:
+            results.add(fieldType.value)
             if (resolveTypedefs) {
                 const result: IResolveResult = resolveIdentifierDefinition(
                     fieldType,
@@ -33,25 +44,6 @@ function identifiersForFieldType(
                 const definition = result.definition
                 const namespace = result.namespace
 
-                // HACK(josh): If the recursively checked namespace is not part of the current namespace we may
-                // need it. This adds it to the current namespace includes.
-                // This should actually be done at the parser level. We only need to do it here because this is the first
-                // recursive check run.
-                if (
-                    context.currentNamespace.namespace.accessor !==
-                        namespace.namespace.accessor &&
-                    !context.currentNamespace.includedNamespaces[
-                        namespace.namespace.accessor
-                    ]
-                ) {
-                    context.currentNamespace.includedNamespaces[
-                        namespace.namespace.accessor
-                    ] =
-                        context.namespaceMap[
-                            namespace.namespace.accessor
-                        ].namespace
-                }
-
                 if (definition.type === SyntaxType.TypedefDefinition) {
                     identifiersForFieldType(
                         definition.definitionType,
@@ -60,9 +52,10 @@ function identifiersForFieldType(
                     )
                 }
 
-                results.add(fieldType.value)
-
-                if (definition.type === SyntaxType.StructDefinition) {
+                if (
+                    recursiveResolve &&
+                    definition.type === SyntaxType.StructDefinition
+                ) {
                     for (const field of definition.fields) {
                         // HACK(josh): If the definition namespace is not part of an identifier
                         // fieldtype we must stub it in for it to be referenced properly. This is
@@ -82,7 +75,8 @@ function identifiersForFieldType(
                                     defFieldType,
                                     results,
                                     context,
-                                    true,
+                                    resolveTypedefs,
+                                    recursiveResolve,
                                 )
                             }
                         } else {
@@ -94,8 +88,6 @@ function identifiersForFieldType(
                         }
                     }
                 }
-            } else {
-                results.add(fieldType.value)
             }
             break
 
@@ -160,7 +152,13 @@ export function identifiersForStatements(
                 break
 
             case SyntaxType.ConstDefinition:
-                identifiersForFieldType(next.fieldType, results, context, true)
+                identifiersForFieldType(
+                    next.fieldType,
+                    results,
+                    context,
+                    true,
+                    true,
+                )
                 identifiersForConstValue(next.initializer, results)
                 break
 

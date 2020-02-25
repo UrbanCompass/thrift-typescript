@@ -13,24 +13,38 @@ import { Resolver } from '../../resolver'
 import { DefinitionType, INamespacePath, IRenderState } from '../../types'
 import { COMMON_IDENTIFIERS } from './identifiers'
 
+
+/**
+ * Boolean check for whether a field uses thrift or Int64
+ * @param fieldType Field type we are resolving
+ * @param state Current render state used for resolving definitions
+ * @param recursiveResolve Recursively check field definitions
+ * @param int64Check Flag for Int64 vs thrift import statements. There is most likely a cleaner way of doing
+ * this without duplicating the function body.
+ */
 function fieldTypeUsesThrift(
     fieldType: FieldType,
     state: IRenderState,
+    recursiveResolve: boolean = false,
+    int64Check: boolean = false
 ): boolean {
     switch (fieldType.type) {
         case SyntaxType.I64Keyword:
-            return true
+            return int64Check
 
         case SyntaxType.MapType:
             return (
-                fieldTypeUsesThrift(fieldType.keyType, state) ||
-                fieldTypeUsesThrift(fieldType.valueType, state)
+                fieldTypeUsesThrift(fieldType.keyType, state, recursiveResolve, int64Check) ||
+                fieldTypeUsesThrift(fieldType.valueType, state, recursiveResolve, int64Check)
             )
 
         case SyntaxType.ListType:
         case SyntaxType.SetType:
-            return fieldTypeUsesThrift(fieldType.valueType, state)
+            return fieldTypeUsesThrift(fieldType.valueType, state, recursiveResolve, int64Check)
         case SyntaxType.Identifier:
+            if (!recursiveResolve) {
+                return false
+            }
             const {
                 definition,
                 namespace,
@@ -40,26 +54,10 @@ function fieldTypeUsesThrift(
                 namespaceMap: state.project.namespaces,
             })
 
-            // HACK(josh): If the recursively checked namespace is not part of the current namespace we may
-            // need it. This adds it to the current namespace includes.
-            // This should actually be done at the parser level. We only need to do it here because this is the first
-            // recursive check run.
             if (
-                state.currentNamespace.namespace.accessor !==
-                    namespace.namespace.accessor &&
-                !state.currentNamespace.includedNamespaces[
-                    namespace.namespace.accessor
-                ]
+                definition.type === SyntaxType.StructDefinition ||
+                definition.type === SyntaxType.UnionDefinition
             ) {
-                state.currentNamespace.includedNamespaces[
-                    namespace.namespace.accessor
-                ] =
-                    state.project.namespaces[
-                        namespace.namespace.accessor
-                    ].namespace
-            }
-
-            if (definition.type === SyntaxType.StructDefinition) {
                 return definition.fields.some((fieldDef) => {
                     // HACK(josh): If the definition namespace is not part of an identifier
                     // fieldtype we must stub it in for it to be referenced properly. This is
@@ -75,7 +73,12 @@ function fieldTypeUsesThrift(
                     }
                     return (
                         defFieldType.type !== SyntaxType.VoidKeyword &&
-                        fieldTypeUsesThrift(defFieldType, state)
+                        fieldTypeUsesThrift(
+                            defFieldType,
+                            state,
+                            recursiveResolve,
+                            int64Check
+                        )
                     )
                 })
             }
@@ -135,12 +138,13 @@ function statementUsesInt64(
             })
 
         case SyntaxType.StructDefinition:
-            return true
         case SyntaxType.UnionDefinition:
-            return true
         case SyntaxType.ExceptionDefinition:
             return statement.fields.some((field: FieldDefinition) => {
-                return field.fieldType.type === SyntaxType.I64Keyword
+                return (
+                    field.fieldType.type !== SyntaxType.VoidKeyword &&
+                    fieldTypeUsesThrift(field.fieldType, state, false, true)
+                )
             })
 
         case SyntaxType.NamespaceDefinition:
@@ -150,10 +154,10 @@ function statementUsesInt64(
             return false
 
         case SyntaxType.ConstDefinition:
-            return fieldTypeUsesThrift(statement.fieldType, state)
+            return fieldTypeUsesThrift(statement.fieldType, state, true, true)
 
         case SyntaxType.TypedefDefinition:
-            return fieldTypeUsesThrift(statement.definitionType, state)
+            return fieldTypeUsesThrift(statement.definitionType, state, false, true)
 
         default:
             const msg: never = statement
