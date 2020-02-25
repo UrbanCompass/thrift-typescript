@@ -13,7 +13,6 @@ import { Resolver } from '../../resolver'
 import { DefinitionType, INamespacePath, IRenderState } from '../../types'
 import { COMMON_IDENTIFIERS } from './identifiers'
 
-
 /**
  * Boolean check for whether a field uses thrift or Int64
  * @param fieldType Field type we are resolving
@@ -26,7 +25,7 @@ function fieldTypeUsesThrift(
     fieldType: FieldType,
     state: IRenderState,
     recursiveResolve: boolean = false,
-    int64Check: boolean = false
+    int64Check: boolean = false,
 ): boolean {
     switch (fieldType.type) {
         case SyntaxType.I64Keyword:
@@ -34,13 +33,28 @@ function fieldTypeUsesThrift(
 
         case SyntaxType.MapType:
             return (
-                fieldTypeUsesThrift(fieldType.keyType, state, recursiveResolve, int64Check) ||
-                fieldTypeUsesThrift(fieldType.valueType, state, recursiveResolve, int64Check)
+                fieldTypeUsesThrift(
+                    fieldType.keyType,
+                    state,
+                    recursiveResolve,
+                    int64Check,
+                ) ||
+                fieldTypeUsesThrift(
+                    fieldType.valueType,
+                    state,
+                    recursiveResolve,
+                    int64Check,
+                )
             )
 
         case SyntaxType.ListType:
         case SyntaxType.SetType:
-            return fieldTypeUsesThrift(fieldType.valueType, state, recursiveResolve, int64Check)
+            return fieldTypeUsesThrift(
+                fieldType.valueType,
+                state,
+                recursiveResolve,
+                int64Check,
+            )
         case SyntaxType.Identifier:
             if (!recursiveResolve) {
                 return false
@@ -77,7 +91,7 @@ function fieldTypeUsesThrift(
                             defFieldType,
                             state,
                             recursiveResolve,
-                            int64Check
+                            int64Check,
                         )
                     )
                 })
@@ -157,7 +171,12 @@ function statementUsesInt64(
             return fieldTypeUsesThrift(statement.fieldType, state, true, true)
 
         case SyntaxType.TypedefDefinition:
-            return fieldTypeUsesThrift(statement.definitionType, state, false, true)
+            return fieldTypeUsesThrift(
+                statement.definitionType,
+                state,
+                false,
+                true,
+            )
 
         default:
             const msg: never = statement
