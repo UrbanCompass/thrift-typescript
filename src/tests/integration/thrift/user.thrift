@@ -29,7 +29,10 @@ const User USER = {
     "value": "test value"
   },
   "subuser": {
-    "subname": "hello subuser"
+    "subname": "hello subuser",
+    "subsubuser": {
+      "subname": "hello subsubuser"
+    }
   },
   "test": {
     "common": {
@@ -41,8 +44,17 @@ const User USER = {
   }
 }
 
+
+const SubUser SUB_USER = {
+  "subname": "hello",
+  "subsubuser": {
+    "subname": "there"
+  }
+}
+
 struct SubUser {
   1: string subname
+  2: optional SubUser subsubuser
 }
 
 struct User {
