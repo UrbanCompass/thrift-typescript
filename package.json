@@ -1,6 +1,6 @@
 {
     "name": "@uc/thrift-typescript",
-    "version": "3.7.6",
+    "version": "3.8.0",
     "description": "Generate TypeScript from Thrift IDL files",
     "main": "./dist/main/index.js",
     "types": "./dist/main/index.d.ts",
