@@ -1,15 +1,15 @@
-export interface IPingArgsArgs {
+export interface IPing__Args__Args {
 }
-export class PingArgs {
+export class Ping__Args {
     constructor() {
     }
     public write(output: thrift.TProtocol): void {
-        output.writeStructBegin("PingArgs");
+        output.writeStructBegin("Ping__Args");
         output.writeFieldStop();
         output.writeStructEnd();
         return;
     }
-    public static read(input: thrift.TProtocol): PingArgs {
+    public static read(input: thrift.TProtocol): Ping__Args {
         input.readStructBegin();
         while (true) {
             const ret: thrift.TField = input.readFieldBegin();
@@ -26,26 +26,26 @@ export class PingArgs {
             input.readFieldEnd();
         }
         input.readStructEnd();
-        return new PingArgs();
+        return new Ping__Args();
     }
 }
-export interface IPingResultArgs {
+export interface IPing__Result__Args {
     success?: void;
 }
-export class PingResult {
+export class Ping__Result {
     public success?: void;
-    constructor(args?: IPingResultArgs) {
+    constructor(args?: IPing__Result__Args) {
         if (args != null && args.success != null) {
             this.success = args.success;
         }
     }
     public write(output: thrift.TProtocol): void {
-        output.writeStructBegin("PingResult");
+        output.writeStructBegin("Ping__Result");
         output.writeFieldStop();
         output.writeStructEnd();
         return;
     }
-    public static read(input: thrift.TProtocol): PingResult {
+    public static read(input: thrift.TProtocol): Ping__Result {
         input.readStructBegin();
         let _args: any = {};
         while (true) {
@@ -71,7 +71,7 @@ export class PingResult {
             input.readFieldEnd();
         }
         input.readStructEnd();
-        return new PingResult(_args);
+        return new Ping__Result(_args);
     }
 }
 export class Client {
@@ -108,7 +108,7 @@ export class Client {
     public send_ping(requestId: number): void {
         const output: thrift.TProtocol = new this.protocol(this.output);
         output.writeMessageBegin("ping", thrift.Thrift.MessageType.CALL, requestId);
-        const args: PingArgs = new PingArgs();
+        const args: Ping__Args = new Ping__Args();
         args.write(output);
         output.writeMessageEnd();
         this.output.flush();
@@ -170,7 +170,7 @@ export class Processor {
                 reject(err);
             }
         }).then((data: void): void => {
-            const result: PingResult = new PingResult({ success: data });
+            const result: Ping__Result = new Ping__Result({ success: data });
             output.writeMessageBegin("ping", thrift.Thrift.MessageType.REPLY, requestId);
             result.write(output);
             output.writeMessageEnd();

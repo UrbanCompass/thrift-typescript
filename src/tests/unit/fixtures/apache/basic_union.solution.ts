@@ -1,11 +1,11 @@
-export interface IMyUnionArgs {
+export interface IMyUnion__Args {
     field1?: string;
     field2?: string;
 }
 export class MyUnion {
     public field1?: string;
     public field2?: string;
-    constructor(args?: IMyUnionArgs) {
+    constructor(args?: IMyUnion__Args) {
         let _fieldsSet: number = 0;
         if (args != null) {
             if (args.field1 != null) {

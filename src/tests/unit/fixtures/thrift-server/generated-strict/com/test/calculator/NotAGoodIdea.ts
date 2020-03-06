@@ -5,8 +5,8 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 */
 import * as thrift from "test-lib";
-import * as CommonStruct from "./CommonStruct";
 import * as TypedMap from "./TypedMap";
+import * as CommonStruct from "./CommonStruct";
 export interface INotAGoodIdea {
     __name: "NotAGoodIdea";
     message?: string;

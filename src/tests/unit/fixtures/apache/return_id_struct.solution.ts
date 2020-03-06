@@ -1,9 +1,9 @@
-export interface IOtherStructArgs {
+export interface IOtherStruct__Args {
     name: string;
 }
 export class OtherStruct {
     public name: string;
-    constructor(args: IOtherStructArgs) {
+    constructor(args: IOtherStruct__Args) {
         if (args != null && args.name != null) {
             this.name = args.name;
         }
@@ -57,12 +57,12 @@ export class OtherStruct {
         }
     }
 }
-export interface IMyStructArgs {
+export interface IMyStruct__Args {
     field1: OtherStruct;
 }
 export class MyStruct {
     public field1: OtherStruct;
-    constructor(args: IMyStructArgs) {
+    constructor(args: IMyStruct__Args) {
         if (args != null && args.field1 != null) {
             this.field1 = args.field1;
         }

@@ -1,9 +1,9 @@
-export interface IMyStructArgs {
+export interface IMyStruct__Args {
     field1: Set<string>;
 }
 export class MyStruct {
     public field1: Set<string>;
-    constructor(args: IMyStructArgs) {
+    constructor(args: IMyStruct__Args) {
         if (args != null && args.field1 != null) {
             this.field1 = args.field1;
         }

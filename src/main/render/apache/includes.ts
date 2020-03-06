@@ -12,10 +12,7 @@ export function renderInt64Import(): ts.ImportDeclaration {
     return ts.createImportDeclaration(
         undefined,
         undefined,
-        ts.createImportClause(
-            COMMON_IDENTIFIERS.Node_Int64,
-            undefined,
-        ),
+        ts.createImportClause(COMMON_IDENTIFIERS.Node_Int64, undefined),
         ts.createLiteral('node-int64'),
     )
 }

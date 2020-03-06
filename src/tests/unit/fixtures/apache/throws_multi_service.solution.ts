@@ -1,9 +1,9 @@
-export interface IServiceExceptionArgs {
+export interface IServiceException__Args {
     message?: string;
 }
 export class ServiceException {
     public message?: string;
-    constructor(args?: IServiceExceptionArgs) {
+    constructor(args?: IServiceException__Args) {
         if (args != null && args.message != null) {
             this.message = args.message;
         }
@@ -49,14 +49,14 @@ export class ServiceException {
         return new ServiceException(_args);
     }
 }
-export interface IAuthExceptionArgs {
+export interface IAuthException__Args {
     message?: string;
     code?: number;
 }
 export class AuthException {
     public message?: string;
     public code?: number;
-    constructor(args?: IAuthExceptionArgs) {
+    constructor(args?: IAuthException__Args) {
         if (args != null && args.message != null) {
             this.message = args.message;
         }
@@ -119,12 +119,12 @@ export class AuthException {
         return new AuthException(_args);
     }
 }
-export interface IUnknownExceptionArgs {
+export interface IUnknownException__Args {
     message?: string;
 }
 export class UnknownException {
     public message?: string;
-    constructor(args?: IUnknownExceptionArgs) {
+    constructor(args?: IUnknownException__Args) {
         if (args != null && args.message != null) {
             this.message = args.message;
         }
@@ -170,12 +170,12 @@ export class UnknownException {
         return new UnknownException(_args);
     }
 }
-export interface IPegArgsArgs {
+export interface IPeg__Args__Args {
     name: string;
 }
-export class PegArgs {
+export class Peg__Args {
     public name: string;
-    constructor(args: IPegArgsArgs) {
+    constructor(args: IPeg__Args__Args) {
         if (args != null && args.name != null) {
             this.name = args.name;
         }
@@ -184,7 +184,7 @@ export class PegArgs {
         }
     }
     public write(output: thrift.TProtocol): void {
-        output.writeStructBegin("PegArgs");
+        output.writeStructBegin("Peg__Args");
         if (this.name != null) {
             output.writeFieldBegin("name", thrift.Thrift.Type.STRING, 1);
             output.writeString(this.name);
@@ -194,7 +194,7 @@ export class PegArgs {
         output.writeStructEnd();
         return;
     }
-    public static read(input: thrift.TProtocol): PegArgs {
+    public static read(input: thrift.TProtocol): Peg__Args {
         input.readStructBegin();
         let _args: any = {};
         while (true) {
@@ -222,25 +222,25 @@ export class PegArgs {
         }
         input.readStructEnd();
         if (_args.name !== undefined) {
-            return new PegArgs(_args);
+            return new Peg__Args(_args);
         }
         else {
-            throw new thrift.Thrift.TProtocolException(thrift.Thrift.TProtocolExceptionType.UNKNOWN, "Unable to read PegArgs from input");
+            throw new thrift.Thrift.TProtocolException(thrift.Thrift.TProtocolExceptionType.UNKNOWN, "Unable to read Peg__Args from input");
         }
     }
 }
-export interface IPegResultArgs {
+export interface IPeg__Result__Args {
     success?: string;
     exp?: ServiceException;
     authExp?: AuthException;
     unknownExp?: UnknownException;
 }
-export class PegResult {
+export class Peg__Result {
     public success?: string;
     public exp?: ServiceException;
     public authExp?: AuthException;
     public unknownExp?: UnknownException;
-    constructor(args?: IPegResultArgs) {
+    constructor(args?: IPeg__Result__Args) {
         if (args != null && args.success != null) {
             this.success = args.success;
         }
@@ -255,7 +255,7 @@ export class PegResult {
         }
     }
     public write(output: thrift.TProtocol): void {
-        output.writeStructBegin("PegResult");
+        output.writeStructBegin("Peg__Result");
         if (this.success != null) {
             output.writeFieldBegin("success", thrift.Thrift.Type.STRING, 0);
             output.writeString(this.success);
@@ -280,7 +280,7 @@ export class PegResult {
         output.writeStructEnd();
         return;
     }
-    public static read(input: thrift.TProtocol): PegResult {
+    public static read(input: thrift.TProtocol): Peg__Result {
         input.readStructBegin();
         let _args: any = {};
         while (true) {
@@ -334,7 +334,7 @@ export class PegResult {
             input.readFieldEnd();
         }
         input.readStructEnd();
-        return new PegResult(_args);
+        return new Peg__Result(_args);
     }
 }
 export class Client {
@@ -371,7 +371,7 @@ export class Client {
     public send_peg(name: string, requestId: number): void {
         const output: thrift.TProtocol = new this.protocol(this.output);
         output.writeMessageBegin("peg", thrift.Thrift.MessageType.CALL, requestId);
-        const args: PegArgs = new PegArgs({ name });
+        const args: Peg__Args = new Peg__Args({ name });
         args.write(output);
         output.writeMessageEnd();
         this.output.flush();
@@ -387,7 +387,7 @@ export class Client {
             return callback(x);
         }
         else {
-            const result: PegResult = PegResult.read(input);
+            const result: Peg__Result = Peg__Result.read(input);
             input.readMessageEnd();
             if (result.exp != null) {
                 return callback(result.exp);
@@ -443,7 +443,7 @@ export class Processor {
     public process_peg(requestId: number, input: thrift.TProtocol, output: thrift.TProtocol): void {
         new Promise<string>((resolve, reject): void => {
             try {
-                const args: PegArgs = PegArgs.read(input);
+                const args: Peg__Args = Peg__Args.read(input);
                 input.readMessageEnd();
                 resolve(this._handler.peg(args.name));
             }
@@ -451,7 +451,7 @@ export class Processor {
                 reject(err);
             }
         }).then((data: string): void => {
-            const result: PegResult = new PegResult({ success: data });
+            const result: Peg__Result = new Peg__Result({ success: data });
             output.writeMessageBegin("peg", thrift.Thrift.MessageType.REPLY, requestId);
             result.write(output);
             output.writeMessageEnd();
@@ -459,7 +459,7 @@ export class Processor {
             return;
         }).catch((err: Error): void => {
             if (err instanceof ServiceException) {
-                const result: PegResult = new PegResult({ exp: err });
+                const result: Peg__Result = new Peg__Result({ exp: err });
                 output.writeMessageBegin("peg", thrift.Thrift.MessageType.REPLY, requestId);
                 result.write(output);
                 output.writeMessageEnd();
@@ -467,7 +467,7 @@ export class Processor {
                 return;
             }
             else if (err instanceof AuthException) {
-                const result: PegResult = new PegResult({ authExp: err });
+                const result: Peg__Result = new Peg__Result({ authExp: err });
                 output.writeMessageBegin("peg", thrift.Thrift.MessageType.REPLY, requestId);
                 result.write(output);
                 output.writeMessageEnd();
@@ -475,7 +475,7 @@ export class Processor {
                 return;
             }
             else if (err instanceof UnknownException) {
-                const result: PegResult = new PegResult({ unknownExp: err });
+                const result: Peg__Result = new Peg__Result({ unknownExp: err });
                 output.writeMessageBegin("peg", thrift.Thrift.MessageType.REPLY, requestId);
                 result.write(output);
                 output.writeMessageEnd();

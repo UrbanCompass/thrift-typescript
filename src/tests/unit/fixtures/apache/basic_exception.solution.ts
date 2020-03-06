@@ -1,9 +1,9 @@
-export interface IMyExceptionArgs {
+export interface IMyException__Args {
     message: string;
 }
 export class MyException {
     public message: string;
-    constructor(args: IMyExceptionArgs) {
+    constructor(args: IMyException__Args) {
         if (args != null && args.message != null) {
             this.message = args.message;
         }

@@ -1,11 +1,11 @@
-export interface IAddArgsArgs {
+export interface IAdd__Args__Args {
     num1: number | Int64;
     num2: number | Int64;
 }
-export class AddArgs {
+export class Add__Args {
     public num1: Int64;
     public num2: Int64;
-    constructor(args: IAddArgsArgs) {
+    constructor(args: IAdd__Args__Args) {
         if (args != null && args.num1 != null) {
             if (typeof args.num1 === "number") {
                 this.num1 = new Int64(args.num1);
@@ -30,7 +30,7 @@ export class AddArgs {
         }
     }
     public write(output: thrift.TProtocol): void {
-        output.writeStructBegin("AddArgs");
+        output.writeStructBegin("Add__Args");
         if (this.num1 != null) {
             output.writeFieldBegin("num1", thrift.Thrift.Type.I64, 1);
             output.writeI64(this.num1);
@@ -45,7 +45,7 @@ export class AddArgs {
         output.writeStructEnd();
         return;
     }
-    public static read(input: thrift.TProtocol): AddArgs {
+    public static read(input: thrift.TProtocol): Add__Args {
         input.readStructBegin();
         let _args: any = {};
         while (true) {
@@ -82,19 +82,19 @@ export class AddArgs {
         }
         input.readStructEnd();
         if (_args.num1 !== undefined && _args.num2 !== undefined) {
-            return new AddArgs(_args);
+            return new Add__Args(_args);
         }
         else {
-            throw new thrift.Thrift.TProtocolException(thrift.Thrift.TProtocolExceptionType.UNKNOWN, "Unable to read AddArgs from input");
+            throw new thrift.Thrift.TProtocolException(thrift.Thrift.TProtocolExceptionType.UNKNOWN, "Unable to read Add__Args from input");
         }
     }
 }
-export interface IAddResultArgs {
+export interface IAdd__Result__Args {
     success?: number | Int64;
 }
-export class AddResult {
+export class Add__Result {
     public success?: Int64;
-    constructor(args?: IAddResultArgs) {
+    constructor(args?: IAdd__Result__Args) {
         if (args != null && args.success != null) {
             if (typeof args.success === "number") {
                 this.success = new Int64(args.success);
@@ -105,7 +105,7 @@ export class AddResult {
         }
     }
     public write(output: thrift.TProtocol): void {
-        output.writeStructBegin("AddResult");
+        output.writeStructBegin("Add__Result");
         if (this.success != null) {
             output.writeFieldBegin("success", thrift.Thrift.Type.I64, 0);
             output.writeI64(this.success);
@@ -115,7 +115,7 @@ export class AddResult {
         output.writeStructEnd();
         return;
     }
-    public static read(input: thrift.TProtocol): AddResult {
+    public static read(input: thrift.TProtocol): Add__Result {
         input.readStructBegin();
         let _args: any = {};
         while (true) {
@@ -142,7 +142,7 @@ export class AddResult {
             input.readFieldEnd();
         }
         input.readStructEnd();
-        return new AddResult(_args);
+        return new Add__Result(_args);
     }
 }
 export class Client {
@@ -179,7 +179,7 @@ export class Client {
     public send_add(num1: Int64, num2: Int64, requestId: number): void {
         const output: thrift.TProtocol = new this.protocol(this.output);
         output.writeMessageBegin("add", thrift.Thrift.MessageType.CALL, requestId);
-        const args: AddArgs = new AddArgs({ num1, num2 });
+        const args: Add__Args = new Add__Args({ num1, num2 });
         args.write(output);
         output.writeMessageEnd();
         this.output.flush();
@@ -195,7 +195,7 @@ export class Client {
             return callback(x);
         }
         else {
-            const result: AddResult = AddResult.read(input);
+            const result: Add__Result = Add__Result.read(input);
             input.readMessageEnd();
             if (result.success != null) {
                 return callback(undefined, result.success);
@@ -240,7 +240,7 @@ export class Processor {
     public process_add(requestId: number, input: thrift.TProtocol, output: thrift.TProtocol): void {
         new Promise<Int64>((resolve, reject): void => {
             try {
-                const args: AddArgs = AddArgs.read(input);
+                const args: Add__Args = Add__Args.read(input);
                 input.readMessageEnd();
                 resolve(this._handler.add(args.num1, args.num2));
             }
@@ -248,7 +248,7 @@ export class Processor {
                 reject(err);
             }
         }).then((data: Int64): void => {
-            const result: AddResult = new AddResult({ success: data });
+            const result: Add__Result = new Add__Result({ success: data });
             output.writeMessageBegin("add", thrift.Thrift.MessageType.REPLY, requestId);
             result.write(output);
             output.writeMessageEnd();

@@ -1,9 +1,9 @@
-export interface IMyStructArgs {
+export interface IMyStruct__Args {
     field1: Map<string, Map<string, number>>;
 }
 export class MyStruct {
     public field1: Map<string, Map<string, number>>;
-    constructor(args: IMyStructArgs) {
+    constructor(args: IMyStruct__Args) {
         if (args != null && args.field1 != null) {
             this.field1 = args.field1;
         }
