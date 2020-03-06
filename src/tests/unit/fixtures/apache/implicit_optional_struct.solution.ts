@@ -1,11 +1,11 @@
-export interface IMyStructArgs {
+export interface IMyStruct__Args {
     id?: number;
     name?: string;
 }
 export class MyStruct {
     public id?: number;
     public name?: string;
-    constructor(args?: IMyStructArgs) {
+    constructor(args?: IMyStruct__Args) {
         if (args != null && args.id != null) {
             this.id = args.id;
         }

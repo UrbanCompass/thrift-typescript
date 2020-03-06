@@ -1,4 +1,4 @@
-export interface IMyStructArgs {
+export interface IMyStruct__Args {
     id: number;
     bigID: number | Int64;
     word: string;
@@ -11,7 +11,7 @@ export class MyStruct {
     public word: string;
     public field1?: number;
     public blob?: Buffer = Buffer.from("binary");
-    constructor(args: IMyStructArgs) {
+    constructor(args: IMyStruct__Args) {
         if (args != null && args.id != null) {
             this.id = args.id;
         }

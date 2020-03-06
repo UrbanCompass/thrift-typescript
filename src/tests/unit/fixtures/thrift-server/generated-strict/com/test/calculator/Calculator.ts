@@ -11,8 +11,8 @@ import * as NotAGoodIdea from "./NotAGoodIdea";
 import * as Work from "./Work";
 import * as Choice from "./Choice";
 import * as com_test_common from "./../common";
-import * as CommonStruct from "./CommonStruct";
 import * as TypedMap from "./TypedMap";
+import * as CommonStruct from "./CommonStruct";
 export const serviceName: string = "Calculator";
 export const annotations: thrift.IThriftAnnotations = {};
 export const methodAnnotations: thrift.IMethodAnnotations = {
